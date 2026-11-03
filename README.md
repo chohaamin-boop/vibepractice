@@ -71,3 +71,5 @@
 
 ## 4. 관련 문서
 - [PROJECT_GUIDE.md](./PROJECT_GUIDE.md): 상세 협업 가이드라인 및 작업 분배 템플릿
+- [AGENTS.md](./AGENTS.md): AI 에이전트에게 효과적으로 지시하고 협업하기 위한 자동 로드 규칙 문서
+
