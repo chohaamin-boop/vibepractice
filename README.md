@@ -63,10 +63,10 @@
 작업이 정해지면 아래 체크리스트에 추가하여 진행 상황을 공유합니다.
 - [x] 프로젝트 저장소 생성 및 초기 규칙 문서화
 - [x] 프로젝트 주제(중복 방지 투표 사이트) 및 3인 작업 분배 계획 확정
-- [ ] 공통 폴더 구조 및 초기 베이스 코드 세팅 (`index.html`, `src/`, `styles/`)
+- [x] 공통 폴더 구조 및 초기 베이스 코드 세팅 (`index.html`, `src/`, `styles/`)
 - [x] 작업자 1: 투표 주제 생성 및 목록 기능 구현 (`feat/topic-manager`)
 - [x] 작업자 2: 투표 진행 및 중복 투표 방지 구현 (`feat/vote-system`)
-- [ ] 작업자 3: 공통 스토어 및 결과 그래프 시각화 구현 (`feat/result-and-store`)
+- [x] 작업자 3: 공통 스토어 및 결과 그래프 시각화 구현 (`feat/result-and-store`)
 
 ---
 
@@ -74,4 +74,3 @@
 - [PROJECT_PLAN.md](./PROJECT_PLAN.md): **투표 사이트 구축 구체적 계획 및 3인 작업 분배 명세서**
 - [PROJECT_GUIDE.md](./PROJECT_GUIDE.md): 상세 협업 가이드라인 및 작업 분배 템플릿
 - [AGENTS.md](./AGENTS.md): AI 에이전트에게 효과적으로 지시하고 협업하기 위한 자동 로드 규칙 문서
-

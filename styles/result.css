@@ -1,0 +1,191 @@
+/**
+ * 작업자 3 담당 스타일시트: 실시간 결과 시각화 UI (styles/result.css)
+ * 충돌 방지를 위해 .result-* 네임스페이스를 사용합니다.
+ */
+
+:root {
+  --result-primary: #10b981;
+  --result-primary-soft: #ecfdf5;
+  --result-winner: #f59e0b;
+  --result-winner-soft: #fef3c7;
+  --result-bg: #ffffff;
+  --result-surface: #f8fafc;
+  --result-border: #e2e8f0;
+  --result-text-main: #0f172a;
+  --result-text-sub: #475569;
+  --result-text-muted: #94a3b8;
+  --result-radius: 12px;
+  --result-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.result-container {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--result-text-main);
+  background: var(--result-bg);
+  border: 1px solid var(--result-border);
+  border-radius: var(--result-radius);
+  padding: 24px;
+  box-shadow: var(--result-shadow);
+}
+
+.result-header {
+  margin-bottom: 20px;
+}
+
+.result-header-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.result-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--result-primary);
+  background-color: var(--result-primary-soft);
+  border-radius: 6px;
+}
+
+.result-total-count {
+  font-size: 0.85rem;
+  color: var(--result-text-sub);
+}
+
+.result-total-count strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.result-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--result-text-main);
+}
+
+/* 결과 아이템 목록 */
+.result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.92rem;
+}
+
+.result-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--result-text-main);
+}
+
+.result-winner-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #b45309;
+  background-color: var(--result-winner-soft);
+  border-radius: 4px;
+}
+
+.result-item-stats {
+  font-size: 0.88rem;
+  color: var(--result-text-sub);
+}
+
+.result-item-stats strong {
+  color: var(--result-text-main);
+}
+
+/* 프로그레스 바 트랙 및 채우기 */
+.result-progress-track {
+  width: 100%;
+  height: 12px;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.result-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34d399, #10b981);
+  border-radius: 999px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.result-progress-fill.is-winner-fill {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+}
+
+/* 하단 실시간 인디케이터 */
+.result-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px dashed var(--result-border);
+}
+
+.result-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--result-text-muted);
+}
+
+.result-pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--result-primary);
+  border-radius: 50%;
+  animation: resultPulse 1.8s infinite;
+}
+
+@keyframes resultPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* 빈 상태 */
+.result-empty-state {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.result-empty-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--result-text-sub);
+}
+

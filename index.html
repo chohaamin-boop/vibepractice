@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Vote — 중복 없는 온라인 투표 사이트</title>
+  <!-- 각 작업자별 독립 스타일시트 로드 -->
+  <link rel="stylesheet" href="./styles/topic.css">
+  <link rel="stylesheet" href="./styles/vote.css">
+  <link rel="stylesheet" href="./styles/result.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      line-height: 1.5;
+      padding: 32px 16px;
+    }
+    .app-header {
+      max-width: 1200px;
+      margin: 0 auto 28px auto;
+      text-align: center;
+    }
+    .app-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1e1b4b;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .app-subtitle {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+    .app-layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .app-column-left {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .app-column-right {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">🗳️ Vibe Vote</h1>
+    <p class="app-subtitle">자유롭게 투표를 만들고, 1인 1표로 중복 없이 공정하게 참여하세요</p>
+  </header>
+
+  <main class="app-layout">
+    <!-- 좌측 영역: 작업자 1 (투표 주제 목록 및 생성) -->
+    <div class="app-column-left">
+      <section id="topic-section"></section>
+    </div>
+
+    <!-- 우측 영역: 작업자 2 (투표 진행 및 중복 방지) + 작업자 3 (실시간 결과 그래프) -->
+    <div class="app-column-right">
+      <section id="vote-section"></section>
+      <section id="result-section"></section>
+    </div>
+  </main>
+
+  <!-- ES 모듈 로드: 스토어(3) -> 주제관리(1) -> 투표시스템(2) -> 결과시각화(3) -->
+  <script type="module" src="./src/store.js"></script>
+  <script type="module" src="./src/topic.js"></script>
+  <script type="module" src="./src/vote.js"></script>
+  <script type="module" src="./src/result.js"></script>
+</body>
+</html>
+
