@@ -1,0 +1,251 @@
+/**
+ * 작업자 2 담당 스타일시트: 투표 진행 및 중복 방지 UI (styles/vote.css)
+ * 충돌을 방지하기 위해 .vote-* 네임스페이스를 사용합니다.
+ */
+
+:root {
+  --vote-primary: #3b82f6;
+  --vote-primary-hover: #2563eb;
+  --vote-primary-soft: #eff6ff;
+  --vote-bg: #ffffff;
+  --vote-surface: #f8fafc;
+  --vote-border: #e2e8f0;
+  --vote-text-main: #0f172a;
+  --vote-text-sub: #475569;
+  --vote-text-muted: #94a3b8;
+  --vote-success: #10b981;
+  --vote-success-bg: #ecfdf5;
+  --vote-danger: #ef4444;
+  --vote-danger-bg: #fef2f2;
+  --vote-radius: 12px;
+  --vote-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.vote-container {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--vote-text-main);
+  background: var(--vote-bg);
+  border: 1px solid var(--vote-border);
+  border-radius: var(--vote-radius);
+  padding: 24px;
+  box-shadow: var(--vote-shadow);
+}
+
+.vote-header {
+  margin-bottom: 20px;
+}
+
+.vote-badge-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.vote-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+.vote-badge-active {
+  color: var(--vote-primary);
+  background-color: var(--vote-primary-soft);
+}
+
+.vote-badge-completed {
+  color: var(--vote-success);
+  background-color: var(--vote-success-bg);
+}
+
+.vote-voter-id-info {
+  font-size: 0.8rem;
+  color: var(--vote-text-muted);
+}
+
+.vote-voter-id-info code {
+  font-family: monospace;
+  background-color: var(--vote-surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--vote-border);
+  color: var(--vote-text-sub);
+}
+
+.vote-title {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--vote-text-main);
+  line-height: 1.4;
+}
+
+.vote-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--vote-text-sub);
+  line-height: 1.5;
+}
+
+/* 선택지 라디오 목록 */
+.vote-options-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.vote-option-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--vote-border);
+  border-radius: 10px;
+  background-color: var(--vote-bg);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.vote-option-item:hover:not(.is-disabled) {
+  border-color: #93c5fd;
+  background-color: #f8faff;
+}
+
+.vote-option-item.is-selected {
+  border-color: var(--vote-primary);
+  background-color: var(--vote-primary-soft);
+}
+
+.vote-option-item.is-disabled {
+  cursor: default;
+  background-color: var(--vote-surface);
+  opacity: 0.85;
+}
+
+.vote-option-item.is-my-choice {
+  border-color: var(--vote-success);
+  background-color: var(--vote-success-bg);
+}
+
+.vote-option-radio {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--vote-primary);
+  cursor: pointer;
+}
+
+.vote-option-item.is-disabled .vote-option-radio {
+  cursor: default;
+}
+
+.vote-option-label {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--vote-text-main);
+}
+
+.vote-my-choice-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--vote-success);
+  background-color: #ffffff;
+  border: 1px solid var(--vote-success);
+  border-radius: 6px;
+}
+
+/* 제출 버튼 */
+.vote-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.vote-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--vote-primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.vote-btn-submit:hover:not(:disabled) {
+  background-color: var(--vote-primary-hover);
+}
+
+.vote-btn-submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.vote-btn-submit:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* 이미 투표한 사용자 안내 박스 */
+.vote-already-box {
+  width: 100%;
+  text-align: center;
+  padding: 16px;
+  background-color: var(--vote-surface);
+  border: 1px dashed var(--vote-border);
+  border-radius: 8px;
+}
+
+.vote-already-text {
+  margin: 0 0 4px 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--vote-text-main);
+}
+
+.vote-already-sub {
+  font-size: 0.82rem;
+  color: var(--vote-text-muted);
+}
+
+/* 메시지 알림 */
+.vote-message {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
+.vote-message-error {
+  color: var(--vote-danger);
+  background-color: var(--vote-danger-bg);
+  border: 1px solid #fecaca;
+}
+
+.vote-message-info {
+  color: var(--vote-primary);
+  background-color: var(--vote-primary-soft);
+  border: 1px solid #bfdbfe;
+}
+
+/* 빈 상태 */
+.vote-empty-state {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.vote-empty-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--vote-text-sub);
+}
+
