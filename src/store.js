@@ -1,18 +1,21 @@
 /**
- * 작업자 3 담당 모듈: 공통 데이터 저장소 및 상태 관리 (src/store.js)
+ * 작업자 3 담당 모듈: 공통 데이터 저장소 및 실시간 서버 동기화 (src/store.js)
  *
  * 주요 기능:
- * 1. 투표 주제 및 득표 데이터 영속화 (localStorage 기반)
- * 2. PROJECT_PLAN.md에 정의된 공통 인터페이스 제공:
+ * 1. Vercel Serverless API (`/api/topics`)와 실시간 양방향 동기화 (모든 사용자 데이터 공유)
+ * 2. 네트워크 오프라인 또는 로컬 단독 실행 시 `localStorage` 자동 Fallback 지원
+ * 3. PROJECT_PLAN.md에 정의된 공통 인터페이스 제공:
  *    - getTopics(): 전체 투표 목록 반환
  *    - getTopicById(id): 특정 투표 상세 반환
- *    - addTopic(topic): 새 투표 주제 저장
- *    - castVote(topicId, optionId, voterId): 득표수 갱신 및 투표자 기록 (중복 검증 포함)
+ *    - addTopic(topic): 새 투표 주제 저장 및 서버 전송
+ *    - castVote(topicId, optionId, voterId): 득표수 갱신 및 서버 측 중복 검증/반영
  *    - hasUserVoted(topicId, voterId): 중복 투표 여부 확인
- * 3. 초기 샘플 데이터 세팅 및 store:updated 이벤트 발행
+ *    - syncFromServer(): 원격 서버 최신 데이터 동기화
  */
 
 const STORAGE_KEY = 'vibe_vote_topics';
+const API_ENDPOINT = '/api/topics';
+const POLL_INTERVAL_MS = 4000;
 
 // 초기 샘플 데이터
 const INITIAL_TOPICS = [
@@ -42,22 +45,49 @@ const INITIAL_TOPICS = [
   }
 ];
 
+let memoryCache = null;
+let isSyncing = false;
+
 /**
- * 로컬스토리지에서 토픽 목록 조회
+ * 로컬 캐시(메모리 + localStorage)에 토픽 목록 저장
+ * @param {Array} topics
+ */
+function saveLocalCache(topics) {
+  if (!Array.isArray(topics)) return;
+  memoryCache = topics;
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(topics));
+    } catch (e) {
+      console.error('로컬 캐시 저장 실패:', e);
+    }
+  }
+}
+
+/**
+ * 전체 토픽 목록 조회 (동기 반환 + 백그라운드 최신화)
  * @returns {Array}
  */
 export function getTopics() {
-  if (typeof localStorage === 'undefined') return [...INITIAL_TOPICS];
+  if (Array.isArray(memoryCache)) {
+    return memoryCache;
+  }
+  if (typeof localStorage === 'undefined') {
+    memoryCache = [...INITIAL_TOPICS];
+    return memoryCache;
+  }
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_TOPICS));
+    saveLocalCache(INITIAL_TOPICS);
     return [...INITIAL_TOPICS];
   }
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [...INITIAL_TOPICS];
+    memoryCache = Array.isArray(parsed) ? parsed : [...INITIAL_TOPICS];
+    return memoryCache;
   } catch {
-    return [...INITIAL_TOPICS];
+    memoryCache = [...INITIAL_TOPICS];
+    return memoryCache;
   }
 }
 
@@ -73,25 +103,78 @@ export function getTopicById(topicId) {
 }
 
 /**
- * 새 투표 주제 등록
+ * 원격 공유 서버(`/api/topics`)에서 최신 투표 목록을 가져와 동기화
+ * 데이터가 실제로 변경된 경우에만 `store:updated` 이벤트를 발생시켜 화면 깜빡임을 방지합니다.
+ */
+export async function syncFromServer() {
+  if (typeof fetch === 'undefined' || isSyncing) return null;
+  isSyncing = true;
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      cache: 'no-store'
+    });
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    if (data && data.ok && Array.isArray(data.topics)) {
+      const currentSnapshot = JSON.stringify(getTopics());
+      const nextSnapshot = JSON.stringify(data.topics);
+      if (currentSnapshot !== nextSnapshot) {
+        saveLocalCache(data.topics);
+        emitStoreUpdate('server:synced', {
+          topics: data.topics,
+          storageType: data.storageType
+        });
+      }
+      return data.topics;
+    }
+  } catch {
+    // 로컬 정적 서버(python http.server 등)에서는 API가 없으므로 조용히 localStorage 모드 유지
+  } finally {
+    isSyncing = false;
+  }
+  return null;
+}
+
+/**
+ * 새 투표 주제 등록 (즉시 낙관적 업데이트 + 공유 서버 전송)
  * @param {object} newTopic
  * @returns {object}
  */
 export function addTopic(newTopic) {
   if (!newTopic || !newTopic.id) throw new Error('유효한 토픽 객체가 아닙니다.');
   const topics = getTopics();
-  const updated = [newTopic, ...topics];
+  const updated = [newTopic, ...topics.filter((t) => t.id !== newTopic.id)];
 
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  saveLocalCache(updated);
+  emitStoreUpdate('topic:added', { topic: newTopic });
+
+  // 비동기로 공유 서버에 반영
+  if (typeof fetch !== 'undefined') {
+    fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'addTopic', topic: newTopic })
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.ok && Array.isArray(data.topics)) {
+          saveLocalCache(data.topics);
+          emitStoreUpdate('server:synced', { topics: data.topics });
+        }
+      })
+      .catch((err) => {
+        console.error('공유 서버에 새 투표 주제 저장 중 오류(로컬 캐시 유지):', err);
+      });
   }
 
-  emitStoreUpdate('topic:added', { topic: newTopic });
   return newTopic;
 }
 
 /**
- * 투표 참여 처리 (1인 1표 중복 방지 및 득표수 1 증가)
+ * 투표 참여 처리 (1인 1표 중복 방지 + 즉시 반영 + 공유 서버 동기화)
  * @param {string} topicId
  * @param {string} optionId
  * @param {string} voterId
@@ -121,19 +204,43 @@ export function castVote(topicId, optionId, voterId) {
     return { success: false, message: '선택한 옵션이 존재하지 않습니다.' };
   }
 
-  // 득표수 반영
+  // 득표수 반영 (낙관적 업데이트)
   option.votes = (Number(option.votes) || 0) + 1;
   if (voterId) {
     topic.voters.push(voterId);
   }
 
   topics[topicIndex] = topic;
+  saveLocalCache(topics);
+  emitStoreUpdate('vote:cast', { topicId, optionId, voterId, topic });
 
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(topics));
+  // 비동기로 공유 서버에 투표 반영
+  if (typeof fetch !== 'undefined') {
+    fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'castVote',
+        topicId,
+        optionId,
+        voterId
+      })
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.topics)) {
+          saveLocalCache(data.topics);
+          emitStoreUpdate('server:synced', {
+            topics: data.topics,
+            topic: data.topic
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('공유 서버에 투표 반영 중 오류(로컬 캐시 유지):', err);
+      });
   }
 
-  emitStoreUpdate('vote:cast', { topicId, optionId, voterId, topic });
   return { success: true, topic };
 }
 
@@ -165,15 +272,24 @@ function emitStoreUpdate(action, detail) {
   }
 }
 
-// 브라우저 전역 VibeStore 객체 등록 (작업자 1, 2 모듈과의 자동 연동 지원)
+// 브라우저 전역 VibeStore 객체 등록 및 자동 서버 동기화 시작
 if (typeof window !== 'undefined') {
   window.VibeStore = {
     getTopics,
     getTopicById,
     addTopic,
     castVote,
-    hasUserVoted
+    hasUserVoted,
+    syncFromServer
   };
   window.store = window.VibeStore;
-}
 
+  // 초기 서버 동기화 및 주기적 실시간 폴링 (다른 사용자의 투표 실시간 반영)
+  syncFromServer();
+  setInterval(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      return;
+    }
+    syncFromServer();
+  }, POLL_INTERVAL_MS);
+}
