@@ -3,6 +3,8 @@
 이 저장소는 프로젝트의 원활한 협업과 체계적인 개발을 위한 공간입니다.  
 프로젝트를 시작하기에 앞서 아래의 **기본 규칙**, **진행 방식**, **작업 분배 가이드**를 숙지해 주세요.
 
+- **배포 주소 (Vercel)**: https://vibepractice-q3xo.vercel.app
+
 ---
 
 ## 1. 프로젝트 기본 규칙 (Ground Rules)
@@ -67,6 +69,7 @@
 - [x] 작업자 1: 투표 주제 생성 및 목록 기능 구현 (`feat/topic-manager`)
 - [x] 작업자 2: 투표 진행 및 중복 투표 방지 구현 (`feat/vote-system`)
 - [x] 작업자 3: 공통 스토어 및 결과 그래프 시각화 구현 (`feat/result-and-store`)
+- [x] Vercel 클라우드 배포 및 공유 데이터베이스 API (`/api/topics`) 연동 (`feat/shared-database`)
 
 ---
 

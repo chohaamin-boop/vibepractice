@@ -757,9 +757,13 @@ export function initTopicManager(options = {}) {
 
   renderTopicList(targetEl);
 
-  // 외부 모듈(작업자 2의 투표 완료 등)에서 데이터가 갱신되었을 때 목록 리렌더링
+  // 외부 모듈(작업자 2의 투표 완료 등)이나 공유 서버에서 데이터가 갱신되었을 때 목록 리렌더링
   window.addEventListener('vote:submitted', () => renderTopicList(targetEl));
-  window.addEventListener('store:updated', () => renderTopicList(targetEl));
+  window.addEventListener('store:updated', () => {
+    if (!state.isModalOpen) {
+      renderTopicList(targetEl);
+    }
+  });
 
   // 초기 선택된 주제 알림
   const currentTopics = getStore().getTopics() || [];
@@ -783,6 +787,7 @@ export function initTopicManager(options = {}) {
 if (typeof window !== 'undefined') {
   window.TopicManager = {
     initTopicManager,
+    renderTopicManager: renderTopicList,
     renderTopicList,
     validateTopicInput,
     createTopicObject
@@ -797,4 +802,3 @@ if (typeof window !== 'undefined') {
     });
   }
 }
-

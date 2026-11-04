@@ -172,6 +172,13 @@ function escapeHtml(str) {
 export function renderVoteSection(container) {
   if (!container) return;
 
+  if (!state.currentTopic) {
+    const topics = getStore().getTopics() || [];
+    if (topics.length > 0) {
+      state.currentTopic = topics[0];
+    }
+  }
+
   const topic = state.currentTopic;
 
   // 주제가 선택되지 않았을 때의 상태
@@ -379,13 +386,27 @@ export function initVoteSystem(options = {}) {
 
   if (!targetEl) return null;
 
-  // 작업자 1(토픽 선택) 이벤트 수신
+  // 작업자 1(토픽 선택) 및 공유 서버 갱신 이벤트 수신
   if (typeof window !== 'undefined') {
     window.addEventListener('topic:selected', (e) => {
       const topic = e.detail?.topic;
       if (topic) {
         state.currentTopic = topic;
         state.selectedOptionId = null;
+        renderVoteSection(targetEl);
+      }
+    });
+
+    window.addEventListener('store:updated', () => {
+      const topics = getStore().getTopics() || [];
+      if (state.currentTopic) {
+        const updated = topics.find((t) => t.id === state.currentTopic.id);
+        if (updated) {
+          state.currentTopic = updated;
+          renderVoteSection(targetEl);
+        }
+      } else if (topics.length > 0) {
+        state.currentTopic = topics[0];
         renderVoteSection(targetEl);
       }
     });
@@ -424,4 +445,3 @@ if (typeof window !== 'undefined') {
     });
   }
 }
-
